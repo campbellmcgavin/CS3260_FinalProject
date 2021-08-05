@@ -15,6 +15,8 @@
 		37F34F1826B0EF020053924E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37F34F1626B0EF020053924E /* LaunchScreen.storyboard */; };
 		37F34F2326B0EF020053924E /* Goal_TrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F2226B0EF020053924E /* Goal_TrackerTests.swift */; };
 		37F34F2E26B0EF020053924E /* Goal_TrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F2D26B0EF020053924E /* Goal_TrackerUITests.swift */; };
+		37F34F3C26B0FE920053924E /* AddViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F3B26B0FE920053924E /* AddViewController.swift */; };
+		37F34F3E26B0FEBA0053924E /* EditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F3D26B0FEBA0053924E /* EditViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,8 @@
 		37F34F2926B0EF020053924E /* Goal TrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Goal TrackerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F34F2D26B0EF020053924E /* Goal_TrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Goal_TrackerUITests.swift; sourceTree = "<group>"; };
 		37F34F2F26B0EF020053924E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		37F34F3B26B0FE920053924E /* AddViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddViewController.swift; sourceTree = "<group>"; };
+		37F34F3D26B0FEBA0053924E /* EditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +107,8 @@
 				37F34F0D26B0EF010053924E /* SceneDelegate.swift */,
 				37F34F0F26B0EF010053924E /* ViewController.swift */,
 				37F34F1126B0EF010053924E /* Main.storyboard */,
+				37F34F3D26B0FEBA0053924E /* EditViewController.swift */,
+				37F34F3B26B0FE920053924E /* AddViewController.swift */,
 				37F34F1426B0EF020053924E /* Assets.xcassets */,
 				37F34F1626B0EF020053924E /* LaunchScreen.storyboard */,
 				37F34F1926B0EF020053924E /* Info.plist */,
@@ -258,8 +264,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37F34F3E26B0FEBA0053924E /* EditViewController.swift in Sources */,
 				37F34F1026B0EF010053924E /* ViewController.swift in Sources */,
 				37F34F0C26B0EF010053924E /* AppDelegate.swift in Sources */,
+				37F34F3C26B0FE920053924E /* AddViewController.swift in Sources */,
 				37F34F0E26B0EF010053924E /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -437,6 +445,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = BH73NP98DL;
 				INFOPLIST_FILE = "Goal Tracker/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -455,6 +464,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = BH73NP98DL;
 				INFOPLIST_FILE = "Goal Tracker/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
