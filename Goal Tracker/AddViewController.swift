@@ -11,16 +11,28 @@ protocol AddGoalProtocol{
     func addGoal(_ ggg:goal)
 }
 
-class AddViewController: UIViewController {
 
+//*********************************************************************************
+//      CLASS DEFINITION
+//*********************************************************************************
+class AddViewController: UIViewController {
+    
+    // OUTLETS
     @IBOutlet weak var goalDescriptionField: UITextField!
     @IBOutlet weak var goalStartDateField: UITextField!
     @IBOutlet weak var goalEndDateField: UITextField!
     @IBOutlet weak var goalPriorityField: UITextField!
     
+    //  MEMBER VARIABLES
     var delegate:ViewController?
     let datePicker = UIDatePicker()
+    var darkModeOn = false
+    var textSize = 14
     
+    
+    //*********************************************************************************
+    //      VIEW DID LOAD
+    //*********************************************************************************
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Create New Goal"
@@ -33,10 +45,35 @@ class AddViewController: UIViewController {
         
         createDatePicker_start(goalStartDateField)
         createDatePicker_end(goalEndDateField)
-        
+        UpdateViewDarkMode()
+        UpdateTextSize()
     }
     
-
+    //*********************************************************************************
+    //      SETTINGS ADJUSTMENTS (TEXT SIZE AND DARK MODE)
+    //*********************************************************************************
+    func UpdateTextSize(){
+        goalDescriptionField.font = goalDescriptionField.font!.withSize(CGFloat((textSize)))
+        goalStartDateField.font = goalStartDateField.font!.withSize(CGFloat((textSize)))
+        goalEndDateField.font = goalEndDateField.font!.withSize(CGFloat((textSize)))
+        goalPriorityField.font = goalPriorityField.font!.withSize(CGFloat((textSize)))
+    }
+    
+    
+    
+    func UpdateViewDarkMode(){
+        
+        if darkModeOn{
+            view.backgroundColor = UIColor.darkGray
+        }
+        else{
+            view.backgroundColor = UIColor.systemBackground
+        }
+    }
+    
+    //*********************************************************************************
+    //      DATE PICKER STUFF
+    //*********************************************************************************
     func createDatePicker_start(_ uitf_local: UITextField){
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
@@ -82,19 +119,21 @@ class AddViewController: UIViewController {
         
     }
     
-    
+    //*********************************************************************************
+    //      SAVE GOAL
+    //*********************************************************************************
     @objc func saveGoal() {
         
         let gDescription = goalDescriptionField.text
         let gStartDate = goalStartDateField.text
         let gEndDate = goalEndDateField.text
-        var gPriority = Int(goalPriorityField.text ?? "1") ?? 1
-        if(gPriority > 5){
-            gPriority = 5
+        var gPriority = goalPriorityField.text
+        if(Int(gPriority ?? "1") ?? 1 > 5){
+            gPriority = "5"
         }
         let gStatus = "Incomplete"
-        let gPercentComplete = Int(0)
-        let tempGoal = goal(goalDescription: gDescription ?? "Blank Description", goalStartDate: gStartDate ?? "missing", goalEndDate: gEndDate ?? "missing", goalPercentComplete: gPercentComplete, goalStatus: gStatus, goalPriority: gPriority)
+        let gPercentComplete = "0"
+        let tempGoal = goal(goalDescription: gDescription ?? "Blank Description", goalStartDate: gStartDate ?? "missing", goalEndDate: gEndDate ?? "missing", goalPercentComplete: gPercentComplete, goalStatus: gStatus, goalPriority: gPriority ?? "1")
         delegate?.addGoal(tempGoal)
         self.navigationController?.popViewController(animated: true)
     }

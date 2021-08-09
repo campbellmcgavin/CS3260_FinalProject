@@ -13,21 +13,51 @@ import SQLite3
 //      GLOBAL VARIABLES
 //*********************************************************************************
 
+
+//establish the goal struct object for keeping goal fields organized
 struct goal {
     var goalDescription: String
     var goalStartDate: String
     var goalEndDate: String
-    var goalPercentComplete: Int
+    var goalPercentComplete: String
     var goalStatus: String
-    var goalPriority: Int
+    var goalPriority: String
 }
 
+//additional global variables
+var firstTime = true
 var goals: [goal] = []
 var goalsFiltered: [goal] = []
-
+var darkMode = false
+var textSize = 14
 var goalBeingEdited: Int!
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AddGoalProtocol, EditGoalProtocol, UISearchBarDelegate{
+
+//class definition
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AddGoalProtocol, EditGoalProtocol, UISearchBarDelegate, SettingsProtocol{
+    
+    
+    
+    //*********************************************************************************
+    //      CHANGE SETTINGS
+    //*********************************************************************************
+    func settingsChangeDarkMode(_ darkModeTemp: Bool) {
+        darkMode = darkModeTemp
+        if(darkMode)
+        {
+            view.backgroundColor = UIColor.darkGray
+        }
+        else{
+            view.backgroundColor = UIColor.systemBackground
+        }
+        
+    }
+    
+    func settingsChangeTextSize(_ textSizeTemp: Int) {
+        textSize = textSizeTemp
+        tableView.reloadData()
+    }
+    
 
     //*********************************************************************************
     //      MEMBER VARIABLES
@@ -44,8 +74,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     //**********************************************************************************
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
+        tableView.backgroundColor = UIColor.clear
         if(SwitchButton.isOn){
+            if(searchBar.text == "")
+            {
+               goalsFiltered = goals
+            }
             return goalsFiltered.count
         }
         else{
@@ -56,9 +90,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.font = cell.textLabel?.font.withSize(CGFloat(textSize))
+        cell.backgroundColor = UIColor.clear
+        
         if(SwitchButton.isOn)
         {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            
             cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
             cell.textLabel?.text = goalsFiltered[indexPath.row].goalDescription
             cell.detailTextLabel?.text = goalsFiltered[indexPath.row].goalStatus
@@ -66,12 +104,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         else{
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            
             cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
             cell.textLabel?.text = goals[indexPath.row].goalDescription
             cell.detailTextLabel?.text = goals[indexPath.row].goalStatus
             return cell
         }
+        
+        
         
 
     }
@@ -87,6 +127,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         return UISwipeActionsConfiguration(actions:[destructiveAction])
     }
+    
+    
+    
     
     
     
@@ -114,40 +157,70 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
   
     
     
-    
+    //*********************************************************************************
+    //      DELETE GOALS
+    //*********************************************************************************
     func deleteGoal() {
         goals.remove(at:goalBeingEdited)
         tableView.reloadData()
     }
     
 
-    
+    //*********************************************************************************
+    //      VIEW DID LOAD
+    //*********************************************************************************
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         searchBar.delegate = self
         // Do any additional setup after loading the view.
         self.title = "Goal Tracker"
+        
+        //SET SETTINGS STUFF
         SwitchButton.isOn = false
         searchBar.text = ""
-        
+
+        //ACTIVATE SAVE TO DATABASE USING THIS BLOCK.
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(saveToDatabase(_:)), name: UIApplication.willResignActiveNotification, object: nil)
         
+        
+        //DECLARE FILE LOCATION
         let fileURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
                     .appendingPathComponent("GoalTracker.sqlite")
         
+        //ATTEMPT TO OPEN  URL
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
             print("error opening database")
         }
 
-        let createTableQuery = "CREATE TABLE IF NOT EXISTS Goals (id INTEGER PRIMARY KEY AUTOINCREMENT, goalDescription VARCHAR, goalStartDate VARCHAR, goalEndDate VARCHAR, goalPercentComplete INTEGER, goalStatus VARCHAR, goalPriority INTEGER)"
         
+        //CREATE TABLE QUERY (GOALS)
+        var createTableQuery = "CREATE TABLE IF NOT EXISTS Goals (id INTEGER PRIMARY KEY AUTOINCREMENT, goalDescription VARCHAR, goalStartDate VARCHAR, goalEndDate VARCHAR, goalPercentComplete VARCHAR, goalStatus VARCHAR, goalPriority VARCHAR)"
+        
+        // EXECUTE TABLE QUERY
         if sqlite3_exec(db, createTableQuery, nil, nil, nil) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
             print("error creating table: \(errmsg)")
         }
+        
+        // CREATE TABLE QUERY (SETTINGS)
+         createTableQuery = "CREATE TABLE IF NOT EXISTS Settings (id INTEGER PRIMARY KEY AUTOINCREMENT, textSize VARCHAR, darkMode VARCHAR)"
+        
+        // EXECUTE TABLE QUERY
+        if sqlite3_exec(db, createTableQuery, nil, nil, nil) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            print("error creating table: \(errmsg)")
+        }
+        
+        
+        
+        
+        // NOW READ IN VALUES FROM GOALS AND SETTINGS
         readValues()
     }
+    
     //**********************************************************************************
     // Reading from the database
     //**********************************************************************************
@@ -157,7 +230,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         goals.removeAll()
  
         //this is our select query
-        let queryString = "SELECT * FROM Goals"
+        var queryString = "SELECT * FROM Goals"
  
         //statement pointer
         var stmt:OpaquePointer?
@@ -178,17 +251,57 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let gDescription = String(cString: sqlite3_column_text(stmt, 1))
             let gStartDate = String(cString: sqlite3_column_text(stmt, 2))
             let gEndDate = String(cString: sqlite3_column_text(stmt, 3))
-            let gPriority = Int(bitPattern: sqlite3_column_text(stmt, 4))
+            let gPercentComplete = String(cString: sqlite3_column_text(stmt, 4))
             let gStatus = String(cString: sqlite3_column_text(stmt, 5))
-            let gPercentComplete = Int(bitPattern: sqlite3_column_text(stmt, 1))
+            let gPriority = String(cString:  sqlite3_column_text(stmt, 6))
             goals.append(
-                goal(goalDescription: gDescription, goalStartDate: gStartDate, goalEndDate: gEndDate, goalPercentComplete: gPercentComplete, goalStatus: gStatus, goalPriority: gPriority)
+                goal(goalDescription: gDescription, goalStartDate: gStartDate, goalEndDate: gEndDate, goalPercentComplete: gPercentComplete, goalStatus: gStatus, goalPriority: gPriority )
            )
 
         }
         
-        sqlite3_close(db)
+        
+        
+        
+        
+        
+        
+        
+        
+        //this is our select query
+        queryString = "SELECT * FROM Settings"
  
+        //preparing the query
+        if sqlite3_prepare(db, queryString, -1, &stmt, nil) != SQLITE_OK{
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            print("error preparing insert: \(errmsg)")
+            return
+        }
+ 
+        
+        
+        //traversing through all the records
+        while(sqlite3_step(stmt) == SQLITE_ROW){
+            //let id = sqlite3_column_int(stmt, 0)
+            
+            textSize = Int(String(cString: sqlite3_column_text(stmt, 1)))!
+            darkMode = Bool(String(cString: sqlite3_column_text(stmt, 2)))!
+            
+            
+
+        }
+        
+        
+        
+        
+        sqlite3_close(db)
+        goalsFiltered = goals
+        
+        //UPDATE THE SETTINGS TO REFLECT WHAT WE JUST READ IN.
+        settingsChangeTextSize(textSize)
+        settingsChangeDarkMode(darkMode)
+        
+        
     }
     
     
@@ -206,7 +319,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     print("error opening database")
                 }
         
-        let deleteFromDb = "DELETE FROM Goals"
+        var deleteFromDb = "DELETE FROM Goals"
         
         if sqlite3_exec(db, deleteFromDb, nil, nil, nil) != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db)!)
@@ -217,7 +330,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 //the insert query
                 
 
-                let queryString = "INSERT INTO Goals (goalDescription, goalStartDate,goalEndDate,goalPercentComplete,goalStatus,goalPriority) VALUES (?,?,?,?,?,?)"
+                let queryString = "INSERT INTO Goals (goalDescription, goalStartDate,goalEndDate, goalPercentComplete, goalStatus, goalPriority ) VALUES (?,?,?,?,?,?)"
 
                 //preparing the query
                 if sqlite3_prepare(db, queryString, -1, &stmt, nil) != SQLITE_OK{
@@ -247,12 +360,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     return
                 }
                 
-                
-                if sqlite3_bind_int(stmt, 4, Int32((goal.goalPercentComplete ))) != SQLITE_OK{
+                if sqlite3_bind_text(stmt, 4, (goal.goalPercentComplete as NSString).utf8String, -1, nil) != SQLITE_OK{
                     let errmsg = String(cString: sqlite3_errmsg(db)!)
                     print("failure binding name: \(errmsg)")
                     return
                 }
+                
+
                 
                 if sqlite3_bind_text(stmt, 5, (goal.goalStatus as NSString).utf8String, -1, nil) != SQLITE_OK{
                     let errmsg = String(cString: sqlite3_errmsg(db)!)
@@ -260,11 +374,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     return
                 }
                 
-                if sqlite3_bind_int(stmt, 4, Int32((goal.goalPriority ))) != SQLITE_OK{
+                if sqlite3_bind_text(stmt, 6, (goal.goalPriority as NSString).utf8String, -1, nil) != SQLITE_OK{
                     let errmsg = String(cString: sqlite3_errmsg(db)!)
                     print("failure binding name: \(errmsg)")
                     return
                 }
+
                 
                 
                 
@@ -274,12 +389,58 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                             return
                         }
                 
-                sqlite3_close(db)
+                
                 
             }
         
-            
         
+        deleteFromDb = "DELETE FROM Settings"
+        
+        if sqlite3_exec(db, deleteFromDb, nil, nil, nil) != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db)!)
+            print("error deleting table: \(errmsg)")
+        }
+        
+            
+
+                let queryString1 = "INSERT INTO Settings (textSize, darkMode) VALUES (?,?)"
+
+                //preparing the query
+                if sqlite3_prepare(db, queryString1, -1, &stmt, nil) != SQLITE_OK{
+                    
+                    let errmsg = String(cString: sqlite3_errmsg(db)!)
+                    print("error preparing insert: \(errmsg)")
+                    return
+                }
+                
+                //binding the parameters
+                
+                if sqlite3_bind_text(stmt, 1, (String(textSize) as NSString).utf8String, -1, nil) != SQLITE_OK{
+                    let errmsg = String(cString: sqlite3_errmsg(db)!)
+                    print("failure binding name: \(errmsg)")
+                    return
+                }
+        
+        
+                if sqlite3_bind_text(stmt, 2, (String(darkMode) as NSString).utf8String, -1, nil) != SQLITE_OK{
+                    let errmsg = String(cString: sqlite3_errmsg(db)!)
+                    print("failure binding name: \(errmsg)")
+                    return
+                }
+                
+
+                
+                
+                
+                if sqlite3_step(stmt) != SQLITE_DONE {
+                            let errmsg = String(cString: sqlite3_errmsg(db)!)
+                            print("failure inserting hero: \(errmsg)")
+                            return
+                        }
+                
+           
+        
+        sqlite3_close(db)
     }
     
     
@@ -294,7 +455,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         if (segue.identifier == "addSegue")
         {
             let view = segue.destination as! AddViewController
+            view.darkModeOn = darkMode
             view.delegate = self
+            view.textSize = textSize
         }
         else if (segue.identifier == "editSegue")
         {
@@ -305,12 +468,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             view.goalEndDateValue = goals[goalBeingEdited].goalEndDate
             view.goalPriorityValue = String(goals[goalBeingEdited].goalPriority)
             view.goalPercentCompleteValue = String(goals[goalBeingEdited].goalPercentComplete)
+            view.darkModeOn = darkMode
+            view.delegate = self
+            view.textSize = textSize
+        }
+        else if (segue.identifier == "settingsSegue")
+        {
+            let view = segue.destination as! SettingsViewController
+            view.darkModeOn = darkMode
+            view.textSize = textSize
             view.delegate = self
         }
         
     }
     
-    //MARK: Search bar config
+    //*********************************************************************************
+    //      SEARCH BAR FILTERING METHODS
+    //*********************************************************************************
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         goalsFiltered = []
         

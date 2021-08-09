@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3734C0EA26C07465001ABAD3 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3734C0E926C07465001ABAD3 /* SettingsViewController.swift */; };
 		37F34F0C26B0EF010053924E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F0B26B0EF010053924E /* AppDelegate.swift */; };
 		37F34F0E26B0EF010053924E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F0D26B0EF010053924E /* SceneDelegate.swift */; };
 		37F34F1026B0EF010053924E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F34F0F26B0EF010053924E /* ViewController.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3734C0E926C07465001ABAD3 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		37F34F0826B0EF010053924E /* Goal Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Goal Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F34F0B26B0EF010053924E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37F34F0D26B0EF010053924E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 		37F34EFF26B0EF010053924E = {
 			isa = PBXGroup;
 			children = (
+				3734C0E926C07465001ABAD3 /* SettingsViewController.swift */,
 				37F34F0A26B0EF010053924E /* Goal Tracker */,
 				37F34F2126B0EF020053924E /* Goal TrackerTests */,
 				37F34F2C26B0EF020053924E /* Goal TrackerUITests */,
@@ -269,6 +272,7 @@
 				37F34F0C26B0EF010053924E /* AppDelegate.swift in Sources */,
 				37F34F3C26B0FE920053924E /* AddViewController.swift in Sources */,
 				37F34F0E26B0EF010053924E /* SceneDelegate.swift in Sources */,
+				3734C0EA26C07465001ABAD3 /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

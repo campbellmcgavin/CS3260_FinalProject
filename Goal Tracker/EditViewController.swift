@@ -11,21 +11,39 @@ protocol EditGoalProtocol{
     func editGoal(_ goal:goal)
 }
 
+
+//*********************************************************************************
+//      CLASS DECLARATION
+//*********************************************************************************
 class EditViewController: UIViewController {
+    
+    // IB OUTLETS
     @IBOutlet weak var goalDescriptionField: UITextField!
     @IBOutlet weak var goalStartDateField: UITextField!
     @IBOutlet weak var goalEndDateField: UITextField!
     @IBOutlet weak var goalPriorityField: UITextField!
     @IBOutlet weak var goalPercentCompleteSliderField: UISlider!
-    
     @IBOutlet weak var goalStatusLabel: UILabel!
     @IBOutlet weak var goalPercentCompleteLabel: UILabel!
     
+    // MEMBER VARIABLES
+    var darkModeOn = false
+    var goalDescriptionValue: String?
+    var goalStartDateValue:String?
+    var goalEndDateValue:String?
+    var goalPriorityValue:String?
+    var goalPercentCompleteValue:String?
+    var goalStatusValue:String?
+    var textSize = 14
+    var delegate:ViewController?
+    let datePicker = UIDatePicker()
+    
+    
+    //  IB ACTIONS
     @IBAction func goalRemoveAction(_ sender: Any) {
         delegate?.deleteGoal();
         self.navigationController?.popViewController(animated: true)
     }
-    
     @IBAction func goalPercentCompleteSlider(_ sender: UISlider) {
         goalPercentCompleteLabel.text = String(Int(sender.value))
         
@@ -38,17 +56,10 @@ class EditViewController: UIViewController {
         }
     }
     
-    var goalDescriptionValue: String?
-    var goalStartDateValue:String?
-    var goalEndDateValue:String?
-    var goalPriorityValue:String?
-    var goalPercentCompleteValue:String?
-    var goalStatusValue:String?
     
-    var delegate:ViewController?
-    
-    let datePicker = UIDatePicker()
-    
+    //*********************************************************************************
+    //      VIEW DID LOAD
+    //*********************************************************************************
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -62,7 +73,7 @@ class EditViewController: UIViewController {
         goalEndDateField.text = goalEndDateValue
         goalPriorityField.text = goalPriorityValue
         goalPercentCompleteLabel.text = goalPercentCompleteValue
-        goalPercentCompleteSliderField.setValue(Float(String(goalPercentCompleteValue!))!, animated: true)
+        goalPercentCompleteSliderField.setValue(Float(goalPercentCompleteValue!)!, animated: true)
         if(Int(goalPercentCompleteValue ?? "0") == 100){
             goalStatusLabel.text = "Complete"
         
@@ -74,9 +85,33 @@ class EditViewController: UIViewController {
         // Do any additional setup after loading the view.
         createDatePicker_start(goalStartDateField)
         createDatePicker_end(goalEndDateField)
+        UpdateViewDarkMode()
+        UpdateTextSize()
     }
     
+    //*********************************************************************************
+    //      SETTINGS (DARK MODE AND TEXT SIZE)
+    //*********************************************************************************
+    func UpdateViewDarkMode(){
+        
+        if darkModeOn{
+            view.backgroundColor = UIColor.darkGray
+        }
+        else{
+            view.backgroundColor = UIColor.systemBackground
+        }
+    }
     
+    func UpdateTextSize(){
+        goalDescriptionField.font = goalDescriptionField.font!.withSize(CGFloat((textSize)))
+        goalStartDateField.font = goalStartDateField.font!.withSize(CGFloat((textSize)))
+        goalEndDateField.font = goalEndDateField.font!.withSize(CGFloat((textSize)))
+        goalPriorityField.font = goalPriorityField.font!.withSize(CGFloat((textSize)))
+    }
+    
+    //*********************************************************************************
+    //      SET UP DATE PICKER
+    //*********************************************************************************
     func createDatePicker_start(_ uitf_local: UITextField){
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
@@ -92,6 +127,7 @@ class EditViewController: UIViewController {
         uitf_local.inputView = datePicker
     
     }
+    
     
     @objc func donePressed_start(){
         goalStartDateField.text = "\(datePicker.date)"
@@ -121,18 +157,21 @@ class EditViewController: UIViewController {
         
     }
     
+    //*********************************************************************************
+    //      SAVE GOAL
+    //*********************************************************************************
     @objc func saveGoal() {
         
         let gDescription = goalDescriptionField.text
         let gStartDate = goalStartDateField.text
         let gEndDate = goalEndDateField.text
-        var gPriority = Int(goalPriorityField.text ?? "1") ?? 1
-        if(gPriority > 5){
-            gPriority = 5
+        var gPriority = goalPriorityField.text
+        if(Int(gPriority ?? "1") ?? 1 > 5){
+            gPriority = "5"
         }
         let gStatus = goalStatusLabel.text ?? "Incomplete"
-        let gPercentComplete = Int(goalPercentCompleteLabel.text ?? "0") ?? 0
-        let tempGoal = goal(goalDescription: gDescription ?? "Blank Description", goalStartDate: gStartDate ?? "missing", goalEndDate: gEndDate ?? "missing", goalPercentComplete: gPercentComplete, goalStatus: gStatus, goalPriority: gPriority)
+        let gPercentComplete = goalPercentCompleteLabel.text
+        let tempGoal = goal(goalDescription: gDescription ?? "Blank Description", goalStartDate: gStartDate ?? "missing", goalEndDate: gEndDate ?? "missing", goalPercentComplete: gPercentComplete ?? "0", goalStatus: gStatus, goalPriority: gPriority ?? "1")
         delegate?.editGoal(tempGoal)
         self.navigationController?.popViewController(animated: true)
     }
